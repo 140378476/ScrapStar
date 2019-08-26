@@ -27,3 +27,5 @@ class StarItem(Item):
     birthPlace = Field()
     profession = Field()
     university = Field()
+    works = Field()
+    imageLinks = Field()

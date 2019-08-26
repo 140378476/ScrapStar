@@ -15,11 +15,19 @@ SPIDER_MODULES = ['ScrapStar.spiders']
 NEWSPIDER_MODULE = 'ScrapStar.spiders'
 
 
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'ScrapStar (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
+
+LOG_LEVEL = 'WARNING'
+FEED_URI = u'out/stars.json'
+FEED_FORMAT = 'JSON'
+FEED_EXPORT_ENCODING="utf-8"
+
+CLOSESPIDER_ITEMCOUNT = 100
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -64,9 +72,12 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'ScrapStar.pipelines.ScrapstarPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   # 'ScrapStar.pipelines.ScrapstarPipeline': 300,
+   'ScrapStar.pipelines.SaveImagePipeline': 300,
+}
+IMAGES_STORE = './out/images'
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
