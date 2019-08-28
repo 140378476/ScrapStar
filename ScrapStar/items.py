@@ -14,8 +14,10 @@ class ScrapstarItem(scrapy.Item):
     # name = scrapy.Field()
     pass
 
+
 class StarItem(Item):
     name = Field()
+    url = Field()
     chineseName = Field()
     foreignName = Field()
     nationality = Field()
@@ -28,4 +30,4 @@ class StarItem(Item):
     profession = Field()
     university = Field()
     works = Field()
-    imageLinks = Field()
+    imageLinks = Field()  # pairs of (imageUrl, title)

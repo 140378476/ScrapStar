@@ -1,15 +1,13 @@
 from scrapy import Selector, Request
 from scrapy.spiders import CrawlSpider
 
+from ScrapStar import settings
 from ScrapStar.items import StarItem
 import re
 
-ENABLE_DEBUG = False
-
-MAX_IMAGE_COUNT = 5
-
 DD_REGEX = re.compile('(<dd.*?>)|(</dd>)')
 HREF_REGEX = re.compile('<a[^>]*>(.*?)</a>')
+TAG_REGEX = re.compile("<(\\w+)[^>]*>(.*?)</\\1>")
 
 
 class StarsSpider(CrawlSpider):
@@ -25,7 +23,10 @@ class StarsSpider(CrawlSpider):
         text = text.replace('\n', '')
         text = DD_REGEX.sub("", text)
         text = HREF_REGEX.sub("\\1", text)
-        return text.strip()
+        text = TAG_REGEX.sub("", text)
+        text = text.strip()
+        # print(text)
+        return text
 
     def getTextOrHrefText(self, block: Selector):
         #
@@ -39,7 +40,8 @@ class StarsSpider(CrawlSpider):
         t = block.xpath("a/text()").extract_first()
         if t is not None:
             return t.strip()
-        return None
+        else:
+            return None
 
     def getTitle(self, item: StarItem, sel: Selector):
         t = sel.xpath('//dd[@class="lemmaWgt-lemmaTitle-title"]/h1/text()').extract_first()
@@ -51,13 +53,15 @@ class StarsSpider(CrawlSpider):
             sl = basicInfo.xpath(f'dt[@class="basicInfo-item name" and text()="{key}"]/following-sibling::dd[1]')
             if len(sl) != 0:
                 return self.extractMixture(sl[0])
-            return None
+            else:
+                return None
 
         def fillItem(variableName: str, key: str):
             t = getItem(key)
-            if t is None:
-                return
-            item[variableName] = t
+            if variableName not in item:
+                item[variableName] = t
+            elif t is not None:
+                item[variableName] = t
 
         fillItem('chineseName', "中文名")
         fillItem('foreignName', "外文名")
@@ -75,6 +79,7 @@ class StarsSpider(CrawlSpider):
 
     def parse(self, response):
         item = StarItem()
+        item['url'] = response.url
         # print(response.url)
         sel = Selector(response)
         self.getTitle(item, sel)
@@ -83,16 +88,11 @@ class StarsSpider(CrawlSpider):
         for basicInfo in basicInfos:
             # print(basicInfo.xpath('dt[@class="basicInfo-item name"]/text()').extract())
             self.findBasicInfo(item, basicInfo)
-        if 'name' in item:
-            # name = item['name']
-            if ENABLE_DEBUG:
-                print(item)
-            else:
-                print(item['name'] + ": "+response.url)
+
         imageFolder = response.url.replace("/item/", "/pic/")
         yield Request(imageFolder, callback=lambda x: self.parseImageFolder(item, x))
 
-        if ENABLE_DEBUG:
+        if settings.ENABLE_DEBUG:
             return
         related = sel.xpath('//div[@id="slider_relations"]/ul')
         for r in related:
@@ -107,7 +107,8 @@ class StarsSpider(CrawlSpider):
         title = block.xpath("@title").extract_first()
         if link is None or title is None:
             return None
-        return link, title
+        else:
+            return link, title
 
     def parseImageFolder(self, item, response):
         sel = Selector(response)
@@ -117,11 +118,17 @@ class StarsSpider(CrawlSpider):
             link = self.extractImage(block)
             if link is not None:
                 imageLinks.append(link)
-                if len(imageLinks) >= MAX_IMAGE_COUNT:
+                if len(imageLinks) >= settings.MAX_IMAGE_COUNT:
                     break
             # imageLinks = map(lambda x: StarsSpider.baseUrl + x, imageLinks)
-        if ENABLE_DEBUG:
+        if settings.ENABLE_DEBUG:
             print(imageLinks[0])
-        item['imageLinks'] = [imageLinks[0], ]
-
+        item['imageLinks'] = imageLinks
+        if 'name' in item:
+            # pass
+            # name = item['name']
+            if settings.ENABLE_DEBUG:
+                print(item)
+            else:
+                print(item['name'] + ": " + item['url'])
         yield item
