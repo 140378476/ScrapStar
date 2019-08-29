@@ -14,8 +14,12 @@ class StarsSpider(CrawlSpider):
     name = "StarsSpider"
     baseUrl = "https://baike.baidu.com"
     allowed_domains = ["baike.baidu.com"]
-    start_urls = ['https://baike.baidu.com/item/%E5%90%B4%E4%BA%AC',
-                  'https://baike.baidu.com/item/%E8%B0%A2%E6%A5%A0/2844135', ]
+    start_urls = [
+        'https://baike.baidu.com/item/%E5%90%B4%E4%BA%AC',  # 吴京
+        'https://baike.baidu.com/item/%E6%9F%AF%E6%B4%81/5037756',  # 柯洁
+        'https://baike.baidu.com/item/%E5%A7%9A%E6%98%8E/28',  # 姚明
+        'https://baike.baidu.com/item/%E8%8E%AB%E8%A8%80/941736',  # 莫言
+    ]
     url = 'https://baike.baidu.com/item/%E5%90%B4%E4%BA%AC'
 
     def extractMixture(self, block: Selector):
@@ -122,13 +126,10 @@ class StarsSpider(CrawlSpider):
                     break
             # imageLinks = map(lambda x: StarsSpider.baseUrl + x, imageLinks)
         if settings.ENABLE_DEBUG:
-            print(imageLinks[0])
+            if len(imageLinks) > 0:
+                print(imageLinks[0])
         item['imageLinks'] = imageLinks
         if 'name' in item:
             # pass
             # name = item['name']
-            if settings.ENABLE_DEBUG:
-                print(item)
-            else:
-                print(item['name'] + ": " + item['url'])
-        yield item
+            yield item

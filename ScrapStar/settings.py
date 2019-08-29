@@ -22,12 +22,15 @@ ROBOTSTXT_OBEY = False
 
 LOG_LEVEL = 'WARNING'
 
-
 ENABLE_DEBUG = False
-DOWNLOAD_IMAGE = False
-SAVE_TO_DATABASE = True
-CLOSESPIDER_ITEMCOUNT = 100
+CLOSESPIDER_ITEMCOUNT = 1000
 
+DOWNLOAD_IMAGE = True
+SAVE_TO_DATABASE = True
+
+DATABASE_HOST = "localhost"
+DATABASE_USER_NAME = "root"
+DATABASE_PASSWORD = "ThePass4MySql!"
 
 MAX_IMAGE_COUNT = 5  # the count of images for each star
 
@@ -81,7 +84,7 @@ if not SAVE_TO_DATABASE:
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     # 'ScrapStar.pipelines.ScrapstarPipeline': 300,
-    'ScrapStar.pipelines.SaveToDatabasePipeline': 500,
+    'ScrapStar.pipelines.FormatDataPipeline': 1,
 }
 if DOWNLOAD_IMAGE:
     ITEM_PIPELINES['ScrapStar.pipelines.SaveImagePipeline'] = 300
